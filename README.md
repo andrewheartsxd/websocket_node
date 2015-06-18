@@ -14,7 +14,8 @@ mkdir db/
 
 ```
 mongod --dbpath=./db
-
+```
+```
 node server.js
 ```
 
