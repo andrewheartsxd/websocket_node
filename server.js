@@ -19,6 +19,21 @@ wss.broadcast = function(data) {
 wss.on("connection", function(ws) {
   console.log("websocket connection open");
 
+  MessageStore.findOne({})
+  .populate('messageStore')
+  .exec(function(err, msgs) {
+    if (err) throw err;
+    console.log("msgs: ");
+    console.log(msgs);
+    if (!msgs) {
+      console.log("no messages in messageStore");
+      return;
+    } 
+    for (var i = 0; i < msgs.messageStore.length; i++) {
+      ws.send(msgs.messageStore[i].nickName + ": " + msgs.messageStore[i].msgBody); 
+    }
+  }); 
+  
   ws.on("message", function(message) {
     var client = {};
     var parsedMessage = JSON.parse(message);
@@ -61,23 +76,24 @@ wss.on("connection", function(ws) {
           }
         }); 
       });
-    } else {
-      // New user -> Show all past messages
-      MessageStore.findOne({})
-      .populate('messageStore')
-      .exec(function(err, msgs) {
-        if (err) throw err;
-        console.log("msgs: ");
-        console.log(msgs);
-        if (!msgs) {
-          console.log("no messages in messageStore");
-          return;
-        } 
-        for (var i = 0; i < msgs.messageStore.length; i++) {
-          ws.send(msgs.messageStore[i].nickName + ": " + msgs.messageStore[i].msgBody); 
-        }
-      }); 
     }
+    //else {
+    //  // New user -> Show all past messages
+    //  MessageStore.findOne({})
+    //  .populate('messageStore')
+    //  .exec(function(err, msgs) {
+    //    if (err) throw err;
+    //    console.log("msgs: ");
+    //    console.log(msgs);
+    //    if (!msgs) {
+    //      console.log("no messages in messageStore");
+    //      return;
+    //    } 
+    //    for (var i = 0; i < msgs.messageStore.length; i++) {
+    //      ws.send(msgs.messageStore[i].nickName + ": " + msgs.messageStore[i].msgBody); 
+    //    }
+    //  }); 
+    //}
   }); 
 
   ws.on("close", function() {
